@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <header.h>
 
 /*
 void RotateGaitUpdateControlPoints(float direction) {

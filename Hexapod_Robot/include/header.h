@@ -1,12 +1,9 @@
 #pragma once
-
 #include <Arduino.h>
-#include <Servo.h>
 #include "Helpers.h"
 #include "RC.h"
 #include "vectors.h"
-#include "Initializations.h"
-//Servo
+#include "Init.h"
 
 
 #define FUNCTIONS_H_
@@ -118,7 +115,7 @@ int binomialCoefficient(int n, int k);
 void calibrationState();
 
 // ================================================================
-// ===                        Car_State                         ===
+// ===                     Moving_State                         ===
 // ================================================================
 extern float forwardAmount;
 extern float turnAmount;
@@ -138,7 +135,7 @@ extern float globalRotationMultiplier;
 extern float maxStrideLength;
 extern float maxSpeed;
 
-void carState();
+void movingState();
 Vector3 getGaitPoint(int leg, float pushFraction);
 
 // ================================================================

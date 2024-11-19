@@ -16,21 +16,21 @@ RC_Data_Package rc_data_previous;
 Hexapod_Data_Package hex_data;
 
 void RC_Setup(){
-  RC_ResetData();
-  if (!radio.begin()) {
-    Serial.println(F("radio hardware is not responding!!"));
-    while (1) {} // hold in infinite loop
-  } else {
-    Serial.println(F("radio hardware is ready!"));
-  }
-  radio.setPALevel(RF24_PA_LOW);
-  radio.setPayloadSize(sizeof(rc_data));
-  radio.setChannel(124);
-  radio.openReadingPipe(1, address[!radioNumber]);
-  radio.enableAckPayload();
-  radio.startListening();
-  initializeHexPayload();  
-  radio.writeAckPayload(1, &hex_data, sizeof(hex_data)); 
+  // RC_ResetData();
+  // if (!radio.begin()) {
+  //   Serial.println(F("radio hardware is not responding!!"));
+  //   while (1) {} // hold in infinite loop
+  // } else {
+  //   Serial.println(F("radio hardware is ready!"));
+  // }
+  // radio.setPALevel(RF24_PA_LOW);
+  // radio.setPayloadSize(sizeof(rc_data));
+  // radio.setChannel(124);
+  // radio.openReadingPipe(1, address[!radioNumber]);
+  // radio.enableAckPayload();
+  // radio.startListening();
+  // initializeHexPayload();  
+  // radio.writeAckPayload(1, &hex_data, sizeof(hex_data)); 
 }
 
 void initializeHexPayload(){
@@ -41,16 +41,20 @@ void initializeHexPayload(){
 
 bool GetData(){  
   // This device is a RX node
-  uint8_t pipe;
-  if (radio.available(&pipe)) {
-    uint8_t bytes = radio.getPayloadSize(); // get the size of the payload
-    radio.read(&rc_data, bytes);            // fetch payload from FIFO 
-    //RC_DisplayData();
-    hex_data.current_sensor_value = mapFloat(analogRead(Current_Sensor_Pin),0,1024,0,50);
-    radio.writeAckPayload(1, &hex_data, sizeof(hex_data)); // load the payload for the next time
-    rc_last_received_time = millis();
-  }
-  if(millis() - rc_last_received_time >  rc_timeout) return false;
+
+  //=========Always True=================
+  // uint8_t pipe;
+  // if (radio.available(&pipe)) {
+  //   uint8_t bytes = radio.getPayloadSize(); // get the size of the payload
+  //   radio.read(&rc_data, bytes);            // fetch payload from FIFO 
+  //   //RC_DisplayData();
+  //   hex_data.current_sensor_value = mapFloat(analogRead(Current_Sensor_Pin),0,1024,0,50);
+  //   radio.writeAckPayload(1, &hex_data, sizeof(hex_data)); // load the payload for the next time
+  //   rc_last_received_time = millis();
+  // }
+  // if(millis() - rc_last_received_time >  rc_timeout) return false;
+  //======================================
+  
   return true;
 }
 

@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <header.h>
+
+
 Vector2 GetPointOnBezierCurve(Vector2* points, int numPoints, float t) {
   Vector2 pos;
 

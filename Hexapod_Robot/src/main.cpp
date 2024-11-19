@@ -1,6 +1,19 @@
 #include <Arduino.h>
 #include <header.h>
 
+//==============================================
+//==================CONST=======================
+//==============================================
+
+const float a1 = 31;  //Coxa Length
+const float a2 = 70; //Femur Length
+const float a3 = 130; //Tibia Length   
+float legLength = a1 + a2 + a3;
+
+State currentState = Initialize;
+Gait currentGait = Tri;
+Gait previousGait = Tri;
+int currentGaitID = 0;
 
 int totalGaits = 6;
 Gait gaits[6] = {Tri,Wave,Ripple,Bi,Quad,Hop};
@@ -11,34 +24,26 @@ int cycleProgress[6];
 LegState legStates[6];
 int standProgress = 0;
 
-State currentState = Initialize;
-Gait currentGait = Tri;
-Gait previousGait = Tri;
-int currentGaitID = 0;
-
 float standingDistanceAdjustment = 0;
 
 float distanceFromGroundBase = -60;
 float distanceFromGround = 0; 
 float previousDistanceFromGround = 0;
 
-float liftHeight = 130;
+float liftHeight = 130;           //Độ cao nhấc chân
 float landHeight = 70;
 float strideOvershoot = 10;
-float distanceFromCenter = 190;
+float distanceFromCenter = 190;         //Khoảng cách đến tâm
 
 float crabTargetForwardAmount = 0;
 float crabForwardAmount = 0;
 
 Vector2 joy1TargetVector = Vector2(0,0);
 float joy1TargetMagnitude = 0;
-
 Vector2 joy1CurrentVector = Vector2(0,0);
 float joy1CurrentMagnitude = 0;
-
 Vector2 joy2TargetVector = Vector2(0,0);
 float joy2TargetMagnitude = 0;
-
 Vector2 joy2CurrentVector = Vector2(0,0);
 float joy2CurrentMagnitude = 0;
 
@@ -50,25 +55,54 @@ int attackCooldown = 0;
 long elapsedTime = 0;
 long loopStartTime = 0;
 
-
+//===================================================
 
 void setup() {
   // Initialize serial communication
   Serial.begin(9600);
-  attachServos(); 
+  attachServos(); //Init Servo
   RC_Setup();
   stateInitialize();
+
+  rc_data.joy1_X = 127;
+  rc_data.joy1_Y = 127;
+  rc_data.joy2_X = 200;
+  rc_data.joy2_Y = 200;
 }
 
 void loop() {
+  // for (uint16_t pulse = 150; pulse < 500; pulse += 10) {
+  //   servoDriver_0.setPWM(0, 0, pulse); // Kênh 0 trên PCA1
+  //   servoDriver_1.setPWM(0, 0, pulse); // Kênh 1 trên PCA2
+  //   delay(100);               // Đợi một chút để quan sát
+  // }
+  // delay(500);
 
+  // for (uint16_t pulse = 500; pulse > 150; pulse -= 10) {
+  //   servoDriver_0.setPWM(0, 0, pulse); // Kênh 0 trên PCA1
+  //   servoDriver_1.setPWM(0, 0, pulse); // Kênh 1 trên PCA2
+  //   delay(100);               // Đợi một chút để quan sát
+  // }
+  // delay(500);
   elapsedTime = millis() - loopStartTime;
   loopStartTime = millis();
 
   bool connected = GetData();
   //RC_DisplayData();
+  // if (rc_data.joy1_X < 240){
+  //   rc_data.joy1_X += 10;
+  //   rc_data.joy1_Y += 10;
+  //   rc_data.joy2_X += 10;
+  //   rc_data.joy2_Y += 10;
+  // }
+  // else {
+  //   rc_data.joy1_X = 197;
+  //   rc_data.joy1_Y = 197;
+  //   rc_data.joy2_X = 127;
+  //   rc_data.joy2_Y = 127;
+  // }
   if(connected){
-
+    // Data 0 -> 254, Default: 127, Scale into -100 -> 100
     double joy1x = map(rc_data.joy1_X,0,254,-100,100);
     double joy1y = map(rc_data.joy1_Y,0,254,-100,100);
 
@@ -85,24 +119,23 @@ void loop() {
     distanceFromGround = distanceFromGroundBase + rc_data.slider1 * -1.7;
     distanceFromCenter = 170;
 
-    
-
-    
+  
   }
   else{
     calibrationState();
     //Serial.println("State: Disconnected");
     return;
   }
-
+  // tốc độ nội suy 8%
   joy1CurrentVector = lerp(joy1CurrentVector, joy1TargetVector, 0.08);
   joy1CurrentMagnitude = lerp(joy1CurrentMagnitude, joy1TargetMagnitude, 0.08);
-
+  // tốc độ nội suy 12%
   joy2CurrentVector = lerp(joy2CurrentVector, joy2TargetVector, 0.12);
   joy2CurrentMagnitude = lerp(joy2CurrentMagnitude, joy2TargetMagnitude, 0.12);  
 
+  //======Change gait===========
   previousGait = currentGait;
-  if(rc_data.pushButton2 == 1  && rc_data_previous.pushButton2 == 0){
+  if(rc_data.pushButton2 == 1  && rc_data_previous.pushButton2 == 0){ 
     currentGaitID += 1;
     if(currentGaitID == totalGaits){
       currentGaitID = 0;
@@ -110,9 +143,9 @@ void loop() {
     
     currentGait = gaits[currentGaitID];
   }
-
+  //============================
   
-  
+  //=========Attack=============
   if(rc_data.joy1_Button == 1 && attackCooldown == 0){
     Serial.println("slam attack");
     resetMovementVectors();
@@ -122,125 +155,28 @@ void loop() {
     loopStartTime = millis();
     return;
   }
+  //============================
   
   else{
     attackCooldown = max(attackCooldown - elapsedTime, (long) 0);
   }
 
+  //=========Moving=============
   if(abs(joy1CurrentMagnitude) >= 10 || abs(joy2CurrentMagnitude) >= 10){
-    carState();
+    movingState();
     timeSinceLastInput = millis();
     return;
   }
-
+  //============================
+  //==========Stand=============
   if(abs((long) timeSinceLastInput - (long) millis()) >(long) 5) {
     standingState();
     return;
   }  
-}
-
-void resetMovementVectors(){
-  joy1CurrentVector = Vector2(0,0);
-  joy1CurrentMagnitude = 0;
-
-  joy2CurrentVector = Vector2(0,0);
-  joy2CurrentMagnitude = 0;
-}
-
-void setCycleStartPoints(int leg){
-  cycleStartPoints[leg] = currentPoints[leg];    
-}
-
-void setCycleStartPoints(){
-  for(int i = 0; i < 6; i++){
-    cycleStartPoints[i] = currentPoints[i]; 
-  }     
-}
-
-int angleToMicroseconds(double angle) {
-  double val = 500.0 + (((2500.0 - 500.0) / 180.0) * angle);
-  return (int)val;
+  //============================
 }
 
 
-
-void moveToPos(int leg, Vector3 pos){
-  currentPoints[leg] = pos;
-  
-  float dis = Vector3(0,0,0).distanceTo(pos);
-  if(dis > legLength){
-    print_value("Point impossible to reach", pos, false);
-    print_value("Distance",dis, true);
-    return;
-  }
-
-  float x = pos.x;
-  float y = pos.y;
-  float z = pos.z;
-
-  float o1 = offsets[leg].x;
-  float o2 = offsets[leg].y;
-  float o3 = offsets[leg].z;
-
-  float theta1 = atan2(y,x) * (180 / PI) + o1; // base angle
-  float l = sqrt(x*x + y*y); // x and y extension 
-  float l1 = l - a1;
-  float h = sqrt(l1*l1 + z*z);
-
-  float phi1 = acos(constrain((pow(h,2) + pow(a2,2) - pow(a3,2)) / (2*h*a2),-1,1));
-  float phi2 = atan2(z, l1);
-  float theta2 = (phi1 + phi2) * 180 / PI + o2;
-  float phi3 = acos(constrain((pow(a2,2) + pow(a3,2) - pow(h,2)) / (2*a2*a3),-1,1));
-  float theta3 = 180 - (phi3 * 180 / PI) + o3;
-
-  targetRot = Vector3(theta1,theta2,theta3);
-  
-  int coxaMicroseconds = angleToMicroseconds(targetRot.x);
-  int femurMicroseconds = angleToMicroseconds(targetRot.y);
-  int tibiaMicroseconds = angleToMicroseconds(targetRot.z);
-
-  switch(leg){
-    case 0:
-      servoDriver_0.setPWM(0, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_0.setPWM(1, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_0.setPWM(2, 0, microsecondsToPWM(tibiaMicroseconds));
-      break;
-
-    case 1:
-      servoDriver_0.setPWM(3, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_0.setPWM(4, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_0.setPWM(5, 0, microsecondsToPWM(tibiaMicroseconds));
-      break;
-
-    case 2:
-      servoDriver_0.setPWM(6, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_0.setPWM(7, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_0.setPWM(8, 0, microsecondsToPWM(tibiaMicroseconds));
-      break;
-
-    case 3:
-      servoDriver_1.setPWM(0, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_1.setPWM(1, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_1.setPWM(2, 0, microsecondsToPWM(tibiaMicroseconds));
-      break;
-
-    case 4:
-      servoDriver_1.setPWM(3, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_1.setPWM(4, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_1.setPWM(5, 0, microsecondsToPWM(tibiaMicroseconds));
-      break;
-
-    case 5:
-      servoDriver_1.setPWM(6, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_1.setPWM(7, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_1.setPWM(8, 0, microsecondsToPWM(tibiaMicroseconds));
-      break;
-
-    default:
-      break;
-  }
-  return; 
-}
 
 
 

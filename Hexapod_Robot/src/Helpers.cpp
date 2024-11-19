@@ -1,6 +1,10 @@
 #include <Arduino.h>
 #include <header.h>
 
+
+// ======================
+// Nội suy tuyến tính, a là bắt đầu, b là kết thúc, f là hệ số nội suy
+
 float lerp(float a, float b, float f)
 {
     return a * (1.0 - f) + (b * f);

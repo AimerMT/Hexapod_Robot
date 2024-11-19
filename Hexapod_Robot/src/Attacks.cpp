@@ -30,8 +30,8 @@ void slamAttack(){
     moveToPos(0, getLeapPathPoint(0,t));
     moveToPos(1, getLeapPathPoint(1,t));
     moveToPos(4, getLeapPathPoint(4,t));
+    
     moveToPos(5, getLeapPathPoint(5,t));
-
     moveToPos(2, getSlamPathPoint(2,t));
     moveToPos(3, getSlamPathPoint(3,t));
     if(t >= 0.5 && slamstarted == false) {
