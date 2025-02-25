@@ -2,13 +2,13 @@
 #include <header.h>
 
 
-RF24 radio(49, 48); // CE, CSN pins
-uint8_t address[][6] = {"1Node", "2Node"}; // Node addresses
-bool radioNumber = 1;
+//RF24 radio(49, 48); // CE, CSN pins
+//uint8_t address[][6] = {"1Node", "2Node"}; // Node addresses
+//bool radioNumber = 1;
 
 // Timing
-unsigned long rc_last_received_time = 0;
-unsigned long rc_timeout = 1000;
+//unsigned long rc_last_received_time = 0;
+//unsigned long rc_timeout = 1000;
 
 // Data structures for RC and Hexapod
 RC_Data_Package rc_data;
@@ -59,35 +59,35 @@ bool GetData(){
 }
 
 void RC_DisplayData(){
-  Serial.print("Joy1 X: ");
-  Serial.print(rc_data.joy1_X);
+  // Serial.print("Joy1 X: ");
+  // Serial.print(rc_data.joy1_X);
 
-  Serial.print(" | Joy1 Y: ");
-  Serial.print(rc_data.joy1_Y);
+  // Serial.print(" | Joy1 Y: ");
+  // Serial.print(rc_data.joy1_Y);
 
-  Serial.print(" | Joy1 Button: ");
-  Serial.print(rc_data.joy1_Button);
+  // Serial.print(" | Joy1 Button: ");
+  // Serial.print(rc_data.joy1_Button);
 
-  Serial.print(" | Joy2 X: ");
-  Serial.print(rc_data.joy2_X);
+  // Serial.print(" | Joy2 X: ");
+  // Serial.print(rc_data.joy2_X);
 
-  Serial.print(" | Joy2 Y: ");
-  Serial.print(rc_data.joy2_Y);
+  // Serial.print(" | Joy2 Y: ");
+  // Serial.print(rc_data.joy2_Y);
 
-  Serial.print(" | Joy2 Button: ");
-  Serial.print(rc_data.joy2_Button);
+  // Serial.print(" | Joy2 Button: ");
+  // Serial.print(rc_data.joy2_Button);
 
-  Serial.print(" | Pot 1: ");
-  Serial.print(rc_data.slider1);
+  // Serial.print(" | Pot 1: ");
+  // Serial.print(rc_data.slider1);
 
-  Serial.print(" | Pot 2: ");
-  Serial.print(rc_data.slider2);
+  // Serial.print(" | Pot 2: ");
+  // Serial.print(rc_data.slider2);
 
-  Serial.print(" | Button 1: ");
-  Serial.print(rc_data.pushButton1);
+  // Serial.print(" | Button 1: ");
+  // Serial.print(rc_data.pushButton1);
 
-  Serial.print(" | Button 2: ");
-  Serial.println(rc_data.pushButton2);
+  // Serial.print(" | Button 2: ");
+  // Serial.println(rc_data.pushButton2);
 }
 
 void RC_ResetData(){
@@ -99,7 +99,7 @@ void RC_ResetData(){
   rc_data.joy2_Y = 127;
   rc_data.joy2_Button = 0;
 
-  rc_data.slider1 = 40;
+  rc_data.slider1 = 0; //40
   rc_data.slider2 = 25;
 
   rc_data.pushButton1 = 0;

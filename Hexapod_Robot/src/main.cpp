@@ -5,9 +5,9 @@
 //==================CONST=======================
 //==============================================
 
-const float a1 = 31;  //Coxa Length
-const float a2 = 70; //Femur Length
-const float a3 = 130; //Tibia Length   
+const float a1 = 29;  //Coxa Length
+const float a2 = 76; //Femur Length
+const float a3 = 106; //Tibia Length   
 float legLength = a1 + a2 + a3;
 
 State currentState = Initialize;
@@ -24,16 +24,16 @@ int cycleProgress[6];
 LegState legStates[6];
 int standProgress = 0;
 
-float standingDistanceAdjustment = 0;
+float standingDistanceAdjustment = 0; //-60   // khoảng cách thân so với đất trong standingstate 
 
-float distanceFromGroundBase = -60;
+float distanceFromGroundBase = -60;   //-60   // khoảng cách thân so với đất trong movingstate 
 float distanceFromGround = 0; 
 float previousDistanceFromGround = 0;
 
-float liftHeight = 130;           //Độ cao nhấc chân
-float landHeight = 70;
+float liftHeight = 40;    //130       
+float landHeight = 20;     //70
 float strideOvershoot = 10;
-float distanceFromCenter = 190;         //Khoảng cách đến tâm
+float distanceFromCenter = 50;         //Khoảng cách đến tâm
 
 float crabTargetForwardAmount = 0;
 float crabForwardAmount = 0;
@@ -63,44 +63,20 @@ void setup() {
   attachServos(); //Init Servo
   RC_Setup();
   stateInitialize();
-
+  delay(1000);
+  //standingState();
   rc_data.joy1_X = 127;
   rc_data.joy1_Y = 127;
-  rc_data.joy2_X = 200;
-  rc_data.joy2_Y = 200;
+  rc_data.joy2_X = 60; // tăng : trái ; giảm : phải
+  rc_data.joy2_Y = 127;
 }
 
 void loop() {
-  // for (uint16_t pulse = 150; pulse < 500; pulse += 10) {
-  //   servoDriver_0.setPWM(0, 0, pulse); // Kênh 0 trên PCA1
-  //   servoDriver_1.setPWM(0, 0, pulse); // Kênh 1 trên PCA2
-  //   delay(100);               // Đợi một chút để quan sát
-  // }
-  // delay(500);
 
-  // for (uint16_t pulse = 500; pulse > 150; pulse -= 10) {
-  //   servoDriver_0.setPWM(0, 0, pulse); // Kênh 0 trên PCA1
-  //   servoDriver_1.setPWM(0, 0, pulse); // Kênh 1 trên PCA2
-  //   delay(100);               // Đợi một chút để quan sát
-  // }
-  // delay(500);
   elapsedTime = millis() - loopStartTime;
   loopStartTime = millis();
 
-  bool connected = GetData();
-  //RC_DisplayData();
-  // if (rc_data.joy1_X < 240){
-  //   rc_data.joy1_X += 10;
-  //   rc_data.joy1_Y += 10;
-  //   rc_data.joy2_X += 10;
-  //   rc_data.joy2_Y += 10;
-  // }
-  // else {
-  //   rc_data.joy1_X = 197;
-  //   rc_data.joy1_Y = 197;
-  //   rc_data.joy2_X = 127;
-  //   rc_data.joy2_Y = 127;
-  // }
+  bool connected = true;
   if(connected){
     // Data 0 -> 254, Default: 127, Scale into -100 -> 100
     double joy1x = map(rc_data.joy1_X,0,254,-100,100);
@@ -110,14 +86,14 @@ void loop() {
     double joy2y = map(rc_data.joy2_Y,0,254,-100,100);
     
     joy1TargetVector = Vector2(joy1x,joy1y);
-    joy1TargetMagnitude = constrain(calculateHypotenuse(abs(joy1x),abs(joy1y)),0,100);   
+    joy1TargetMagnitude = constrain(calculateHypotenuse(abs(joy1x),abs(joy1y)),0,100);    // giới hạn giá trị độ lớn tính được trong khoảng 0-100
 
     joy2TargetVector = Vector2(joy2x,joy2y);
     joy2TargetMagnitude = constrain(calculateHypotenuse(abs(joy2x),abs(joy2y)),0,100);  
 
     previousDistanceFromGround = distanceFromGround;
     distanceFromGround = distanceFromGroundBase + rc_data.slider1 * -1.7;
-    distanceFromCenter = 170;
+    distanceFromCenter = 78; //170
 
   
   }
@@ -174,6 +150,7 @@ void loop() {
     return;
   }  
   //============================
+  
 }
 
 

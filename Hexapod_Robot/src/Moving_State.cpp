@@ -14,16 +14,16 @@ float pushFraction = 3.0/6.0;
 float speedMultiplier = 0.5;
 float strideLengthMultiplier = 1.5;
 float liftHeightMultiplier = 1.0;
-float maxStrideLength = 200;
+float maxStrideLength = 200;  //200
 float maxSpeed = 100;
-float legPlacementAngle = 56;
+float legPlacementAngle = 45; //56
 
-int leftSlider = 50;
+int leftSlider = 10;
 float globalSpeedMultiplier = 0.55;   //tốc độ từ người dùng
-float globalRotationMultiplier = 0.55; // độ xoay từ người dùng
+float globalRotationMultiplier = 0.55; // độ xoay từ người dùng 0.55
 
 void movingState() {
-  rc_data.slider2 = 80; // add by VyHoa
+  rc_data.slider2 = 10; // add by VyHoa
   leftSlider = (int)rc_data.slider2; 
   globalSpeedMultiplier = (leftSlider + 10.0)*0.01;
   globalRotationMultiplier = map(rc_data.slider2,0,100,40,130) * 0.01;
@@ -251,23 +251,22 @@ Vector3 getGaitPoint(int leg, float pushFraction){
 
 // Initialize
 void stateInitialize(){
-  moveToPos(0, Vector3(160,0,0));
-  moveToPos(1, Vector3(160,0,0));
-  moveToPos(2, Vector3(160,0,0));
-  moveToPos(3, Vector3(160,0,0));
-  moveToPos(4, Vector3(160,0,0));
-  moveToPos(5, Vector3(160,0,0));
+  moveToPos(0, Vector3(a1+a2+a3,0,0));
+  moveToPos(1, Vector3(a1+a2+a3,0,0));
+  moveToPos(2, Vector3(a1+a2+a3,0,0));
+  moveToPos(3, Vector3(a1+a2+a3,0,0));
+  moveToPos(4, Vector3(a1+a2+a3,0,0));
+  moveToPos(5, Vector3(a1+a2+a3,0,0));
 
   delay(25);
 
-  moveToPos(0, Vector3(225,0,115));
-  moveToPos(1, Vector3(225,0,115));
-  moveToPos(2, Vector3(225,0,115));
-  moveToPos(3, Vector3(225,0,115));
-  moveToPos(4, Vector3(225,0,115));
-  moveToPos(5, Vector3(225,0,115));
-  //return;
-
+  moveToPos(0, Vector3(a1+a3,0,a2));
+  moveToPos(1, Vector3(a1+a3,0,a2));
+  moveToPos(2, Vector3(a1+a3,0,a2));
+  moveToPos(3, Vector3(a1+a3,0,a2));
+  moveToPos(4, Vector3(a1+a3,0,a2));
+  moveToPos(5, Vector3(a1+a3,0,a2));
+ 
   delay(500);
 }
 
@@ -291,11 +290,62 @@ void setCycleStartPoints(){
 }
 
 int angleToMicroseconds(double angle) {
+  angle = constrain(angle, 0, 180);
   double val = 500.0 + (((2500.0 - 500.0) / 180.0) * angle);
   return (int)val;
 }
 
+void rotateToAngle(int leg, Vector3 targetRot) {
+  attachServos();  // Kiểm tra xem servo đã được gắn chưa
 
+  // Chuyển đổi góc sang microseconds
+  int coxaMicroseconds = angleToMicroseconds(targetRot.x);
+  int femurMicroseconds = angleToMicroseconds(targetRot.y);
+  int tibiaMicroseconds = angleToMicroseconds(targetRot.z);
+
+  // Sử dụng servo driver để điều khiển các servo cho mỗi chân
+  switch (leg) {
+    case 0:
+      servoDriver_0.setPWM(coxa1Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_0.setPWM(femur1Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_0.setPWM(tibia1Pin, 0, microsecondsToPWM(tibiaMicroseconds));
+      break;
+
+    case 1:
+      servoDriver_0.setPWM(coxa2Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_0.setPWM(femur2Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_0.setPWM(tibia2Pin, 0, microsecondsToPWM(tibiaMicroseconds));
+      break;
+
+    case 2:
+      servoDriver_0.setPWM(coxa3Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_0.setPWM(femur3Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_0.setPWM(tibia3Pin, 0, microsecondsToPWM(tibiaMicroseconds));
+      break;
+
+    case 3:
+      servoDriver_1.setPWM(coxa4Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_1.setPWM(femur4Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_1.setPWM(tibia4Pin, 0, microsecondsToPWM(tibiaMicroseconds));
+      break;
+
+    case 4:
+      servoDriver_1.setPWM(coxa5Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_1.setPWM(femur5Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_1.setPWM(tibia5Pin, 0, microsecondsToPWM(tibiaMicroseconds));
+      break;
+
+    case 5:
+      servoDriver_1.setPWM(coxa6Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_1.setPWM(femur6Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_1.setPWM(tibia6Pin, 0, microsecondsToPWM(tibiaMicroseconds));
+      break;
+
+    default:
+      break;
+  }
+  return;
+}
 
 void moveToPos(int leg, Vector3 pos){
   currentPoints[leg] = pos;
@@ -315,16 +365,26 @@ void moveToPos(int leg, Vector3 pos){
   float o2 = offsets[leg].y;
   float o3 = offsets[leg].z;
 
-  float theta1 = atan2(y,x) * (180 / PI) + o1; // base angle
-  float l = sqrt(x*x + y*y); // x and y extension 
-  float l1 = l - a1;
-  float h = sqrt(l1*l1 + z*z);
+  // Xử lý mirroring cho chân 3, 4, 5
+  bool isMirrored = (leg == 3 || leg == 4 || leg == 5);
 
-  float phi1 = acos(constrain((pow(h,2) + pow(a2,2) - pow(a3,2)) / (2*h*a2),-1,1));
+  float theta1 = atan2(y, x) * (180 / PI) + o1; // Base angle
+  float l = sqrt(x * x + y * y);               // X and Y extension
+  float l1 = l - a1;
+  float h = sqrt(l1 * l1 + z * z);
+
+  float phi1 = acos(constrain((pow(h, 2) + pow(a2, 2) - pow(a3, 2)) / (2 * h * a2), -1, 1));
   float phi2 = atan2(z, l1);
   float theta2 = (phi1 + phi2) * 180 / PI + o2;
-  float phi3 = acos(constrain((pow(a2,2) + pow(a3,2) - pow(h,2)) / (2*a2*a3),-1,1));
+
+  float phi3 = acos(constrain((pow(a2, 2) + pow(a3, 2) - pow(h, 2)) / (2 * a2 * a3), -1, 1));
   float theta3 = 180 - (phi3 * 180 / PI) + o3;
+
+  // Nếu chân mirrored, thay đổi cách tính góc theta2 và theta3
+  if (isMirrored) {
+      theta2 = -theta2 + 2 * o2; // Mirror góc theta2
+      theta3 = -theta3 + 2 * o3; // Mirror góc theta3
+  }
 
   targetRot = Vector3(theta1,theta2,theta3);
   
@@ -334,39 +394,39 @@ void moveToPos(int leg, Vector3 pos){
 
   switch(leg){
     case 0:
-      servoDriver_0.setPWM(0, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_0.setPWM(1, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_0.setPWM(2, 0, microsecondsToPWM(tibiaMicroseconds));
+      servoDriver_0.setPWM(coxa1Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_0.setPWM(femur1Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_0.setPWM(tibia1Pin, 0, microsecondsToPWM(tibiaMicroseconds));
       break;
 
     case 1:
-      servoDriver_0.setPWM(4, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_0.setPWM(5, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_0.setPWM(6, 0, microsecondsToPWM(tibiaMicroseconds));
+      servoDriver_0.setPWM(coxa2Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_0.setPWM(femur2Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_0.setPWM(tibia2Pin, 0, microsecondsToPWM(tibiaMicroseconds));
       break;
 
     case 2:
-      servoDriver_0.setPWM(8, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_0.setPWM(9, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_0.setPWM(10, 0, microsecondsToPWM(tibiaMicroseconds));
+      servoDriver_0.setPWM(coxa3Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_0.setPWM(femur3Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_0.setPWM(tibia3Pin, 0, microsecondsToPWM(tibiaMicroseconds));
       break;
 
     case 3:
-      servoDriver_1.setPWM(0, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_1.setPWM(1, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_1.setPWM(2, 0, microsecondsToPWM(tibiaMicroseconds));
+      servoDriver_1.setPWM(coxa4Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_1.setPWM(femur4Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_1.setPWM(tibia4Pin, 0, microsecondsToPWM(tibiaMicroseconds));
       break;
 
     case 4:
-      servoDriver_1.setPWM(3, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_1.setPWM(4, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_1.setPWM(5, 0, microsecondsToPWM(tibiaMicroseconds));
+      servoDriver_1.setPWM(coxa5Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_1.setPWM(femur5Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_1.setPWM(tibia5Pin, 0, microsecondsToPWM(tibiaMicroseconds));
       break;
 
     case 5:
-      servoDriver_1.setPWM(6, 0, microsecondsToPWM(coxaMicroseconds));
-      servoDriver_1.setPWM(7, 0, microsecondsToPWM(femurMicroseconds));
-      servoDriver_1.setPWM(8, 0, microsecondsToPWM(tibiaMicroseconds));
+      servoDriver_1.setPWM(coxa6Pin, 0, microsecondsToPWM(coxaMicroseconds));
+      servoDriver_1.setPWM(femur6Pin, 0, microsecondsToPWM(femurMicroseconds));
+      servoDriver_1.setPWM(tibia6Pin, 0, microsecondsToPWM(tibiaMicroseconds));
       break;
 
     default:
