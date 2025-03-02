@@ -11,8 +11,8 @@ const float a3 = 106; //Tibia Length
 float legLength = a1 + a2 + a3;
 
 State currentState = Initialize;
-Gait currentGait = Tri;
-Gait previousGait = Tri;
+Gait currentGait = Ripple;
+Gait previousGait = Ripple;
 int currentGaitID = 0;
 
 int totalGaits = 6;
@@ -65,9 +65,9 @@ void setup() {
   stateInitialize();
   delay(1000);
   //standingState();
-  rc_data.joy1_X = 127;
-  rc_data.joy1_Y = 127;
-  rc_data.joy2_X = 60; // tăng : trái ; giảm : phải
+  rc_data.joy1_X = 127; // Đi ngang
+  rc_data.joy1_Y = 200; // Tiến + Lùi
+  rc_data.joy2_X = 127; // 127->255 : Xoay trái ; 0->127 : Xoay phải
   rc_data.joy2_Y = 127;
 }
 
@@ -93,7 +93,7 @@ void loop() {
 
     previousDistanceFromGround = distanceFromGround;
     distanceFromGround = distanceFromGroundBase + rc_data.slider1 * -1.7;
-    distanceFromCenter = 78; //170
+    distanceFromCenter = 100; //78
 
   
   }

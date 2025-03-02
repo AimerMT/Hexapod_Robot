@@ -23,7 +23,7 @@ float globalSpeedMultiplier = 0.55;   //tốc độ từ người dùng
 float globalRotationMultiplier = 0.55; // độ xoay từ người dùng 0.55
 
 void movingState() {
-  rc_data.slider2 = 10; // add by VyHoa
+  rc_data.slider2 = 25; // add by VyHoa
   leftSlider = (int)rc_data.slider2; 
   globalSpeedMultiplier = (leftSlider + 10.0)*0.01;
   globalRotationMultiplier = map(rc_data.slider2,0,100,40,130) * 0.01;
@@ -258,7 +258,7 @@ void stateInitialize(){
   moveToPos(4, Vector3(a1+a2+a3,0,0));
   moveToPos(5, Vector3(a1+a2+a3,0,0));
 
-  delay(25);
+  delay(1000);
 
   moveToPos(0, Vector3(a1+a3,0,a2));
   moveToPos(1, Vector3(a1+a3,0,a2));

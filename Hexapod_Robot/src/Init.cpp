@@ -43,11 +43,11 @@ const int femur6Pin = 13;
 const int tibia6Pin = 14;
 
 // Định nghĩa các Vector3
-const Vector3 offsets1 = {80,70,-5}; // 90 75 -18
-const Vector3 offsets2 = {90,90,-10}; 
-const Vector3 offsets3 = {90,85,-10}; 
-const Vector3 offsets4 = {80,90,170};
-const Vector3 offsets5 = {80,90,170};
+const Vector3 offsets1 = {80,70,-2}; // 90 75 -18
+const Vector3 offsets2 = {90,80,-10}; 
+const Vector3 offsets3 = {90,85,-5}; 
+const Vector3 offsets4 = {80,92,170};
+const Vector3 offsets5 = {80,95,170}; //{80,90,170};
 const Vector3 offsets6 = {80,85,170};
 const Vector3 offsets[6] = {offsets1, offsets2, offsets3, offsets4, offsets5, offsets6};
 
@@ -59,9 +59,11 @@ Vector3 cycleStartPoints[6];
 Vector3 currentRot(180, 0, 180);
 Vector3 targetRot(180, 0, 180);
 
-float strideMultiplier[6] = {1, -1, -1, -1, 1, 1}; //1, 1, 1, -1, -1, -1
+//float strideMultiplier[6] = {1, -1, -1, -1, 1, 1}; //1, 1, 1, -1, -1, -1
+float strideMultiplier[6] = {1, 1, 1, -1, -1, -1}; //1, 1, 1, -1, -1, -1
 //float strideMultiplier_1[6] = {-1, -1, -1, -1, -1, -1};
-float rotationMultiplier[6] = {-1, 1, 1, -1, 1 , 1}; //-1, 0, 1, -1, 0 , 1
+//float rotationMultiplier[6] = {-1, 1, 1, -1, 1 , 1}; //-1, 0, 1, -1, 0 , 1
+float rotationMultiplier[6] = {-1, 0, 1, -1, 0 , 1}; //-1, 0, 1, -1, 0 , 1
 
 Vector3 ControlPoints[10];
 Vector3 RotateControlPoints[10];
