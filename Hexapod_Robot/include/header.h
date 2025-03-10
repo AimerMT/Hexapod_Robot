@@ -4,6 +4,8 @@
 #include "RC.h"
 #include "vectors.h"
 #include "Init.h"
+#include <SoftwareSerial.h>
+#include <Wire.h>
 
 
 #define FUNCTIONS_H_
@@ -172,4 +174,14 @@ void slamAttack();
 Vector3 getFootPlacementPathPoint(int leg, float t);
 Vector3 getLeapPathPoint(int leg, float t);
 Vector3 getSlamPathPoint(int leg, float t);
+
+// ================================================================
+// ===                            Bluetooth                     ===
+// ================================================================
+
+#define rxBluetooth PA10  // Chân RX của STM32
+#define txBluetooth PA9   // Chân TX của STM32
+
+extern SoftwareSerial bluetoothSerial;
+void Bluetooth_init();
 #endif
