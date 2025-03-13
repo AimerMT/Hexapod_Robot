@@ -43,12 +43,12 @@ const int femur6Pin = 13;
 const int tibia6Pin = 14;
 
 // Định nghĩa các Vector3
-const Vector3 offsets1 = {80,70,-2}; // 90 75 -18
-const Vector3 offsets2 = {90,80,-10}; 
-const Vector3 offsets3 = {90,85,-5}; 
+const Vector3 offsets1 = {80,76,3}; // 90 75 -18
+const Vector3 offsets2 = {90,85,-8}; 
+const Vector3 offsets3 = {90,90,-2}; 
 const Vector3 offsets4 = {80,92,170};
 const Vector3 offsets5 = {80,95,170}; //{80,90,170};
-const Vector3 offsets6 = {80,85,170};
+const Vector3 offsets6 = {80,90,165};
 const Vector3 offsets[6] = {offsets1, offsets2, offsets3, offsets4, offsets5, offsets6};
 
 
