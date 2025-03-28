@@ -184,4 +184,11 @@ Vector3 getSlamPathPoint(int leg, float t);
 
 extern SoftwareSerial bluetoothSerial;
 void Bluetooth_init();
+
+#define rxPi PA3  // Chân RX của STM32
+#define txPi PA2   // Chân TX của STM32
+
+extern SoftwareSerial TalkPi;
+void Serial_init();
+
 #endif

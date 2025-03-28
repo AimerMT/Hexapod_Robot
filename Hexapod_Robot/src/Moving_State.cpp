@@ -251,14 +251,14 @@ Vector3 getGaitPoint(int leg, float pushFraction){
 
 // Initialize
 void stateInitialize(){
-  moveToPos(0, Vector3(a1+a2+a3,0,0));
-  moveToPos(1, Vector3(a1+a2+a3,0,0));
-  moveToPos(2, Vector3(a1+a2+a3,0,0));
-  moveToPos(3, Vector3(a1+a2+a3,0,0));
-  moveToPos(4, Vector3(a1+a2+a3,0,0));
-  moveToPos(5, Vector3(a1+a2+a3,0,0));
+  // moveToPos(0, Vector3(a1+a2+a3,0,0));
+  // moveToPos(1, Vector3(a1+a2+a3,0,0));
+  // moveToPos(2, Vector3(a1+a2+a3,0,0));
+  // moveToPos(3, Vector3(a1+a2+a3,0,0));
+  // moveToPos(4, Vector3(a1+a2+a3,0,0));
+  // moveToPos(5, Vector3(a1+a2+a3,0,0));
 
-  delay(1000);
+  // delay(1000);
 
   moveToPos(0, Vector3(a1+a3,0,a2));
   moveToPos(1, Vector3(a1+a3,0,a2));

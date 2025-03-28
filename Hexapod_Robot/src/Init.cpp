@@ -19,12 +19,12 @@ Adafruit_PWMServoDriver servoDriver_1 = Adafruit_PWMServoDriver(0x40);
 
 
 const int coxa1Pin = 0;  //Khop 1 
-const int femur1Pin = 1; //Khop 2
-const int tibia1Pin = 2; //Khop 3
+const int femur1Pin = 2; //Khop 2
+const int tibia1Pin = 3; //Khop 3
 
 const int coxa2Pin = 4;
-const int femur2Pin = 5;
-const int tibia2Pin = 6;
+const int femur2Pin = 8;
+const int tibia2Pin = 11;
 
 const int coxa3Pin = 12;
 const int femur3Pin = 13;
@@ -43,9 +43,9 @@ const int femur6Pin = 13;
 const int tibia6Pin = 14;
 
 // Định nghĩa các Vector3
-const Vector3 offsets1 = {80,76,3}; // 90 75 -18
-const Vector3 offsets2 = {90,85,-8}; 
-const Vector3 offsets3 = {90,90,-2}; 
+const Vector3 offsets1 = {90,70,3}; // 90 75 -18
+const Vector3 offsets2 = {93,85,-8}; 
+const Vector3 offsets3 = {98,90,-2}; 
 const Vector3 offsets4 = {80,92,170};
 const Vector3 offsets5 = {80,95,170}; //{80,90,170};
 const Vector3 offsets6 = {80,90,165};

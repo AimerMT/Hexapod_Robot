@@ -25,3 +25,14 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+// void switchUART(bool useBT) {
+//   if (useBT) {
+//       TalkPi.end();      // Tắt UART1 (Raspberry Pi)
+//       bluetoothSerial.begin(9600); // Bật UART2 (HC-05)
+//   } else {
+//     bluetoothSerial.end();     // Tắt UART2 (HC-05)
+//     TalkPi.begin(9600); // Bật UART1 (Raspberry Pi)
+//   }
+//   useBluetooth = useBT;
+// }
