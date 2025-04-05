@@ -11,13 +11,14 @@ float  tArray[6];
 int ControlPointsAmount = 0;
 int RotateControlPointsAmount = 0;
 float pushFraction = 3.0/6.0;
+//người dùng có thể thay đổi tốc độ, sải bước và độ xoay
 float speedMultiplier = 0.5;
 float strideLengthMultiplier = 1.5;
 float liftHeightMultiplier = 1.0;
-float maxStrideLength = 200;  //200
+float maxStrideLength = 200;  //do dai sai buoc chan
 float maxSpeed = 100;
 float legPlacementAngle = 45; //56
-
+// 
 int leftSlider = 10;
 float globalSpeedMultiplier = 0.55;   //tốc độ từ người dùng
 float globalRotationMultiplier = 0.55; // độ xoay từ người dùng 0.55
@@ -37,7 +38,7 @@ void movingState() {
     }   
 
     switch (currentGait) {
-      case Tri:
+      case Tri:       //3 chân tiến 3 chân nhấc, sải bước trung bình, tốc độ cao
         cycleProgress[0] = 0;
         cycleProgress[1] = (points / 2);
         cycleProgress[2] = 0;
@@ -170,7 +171,7 @@ void movingState() {
   moveToPos(5, getGaitPoint(5, pushFraction));
   
   
-
+//Tính toán tốc độ chu kỳ bước, phụ thuộc joystick, hệ số tốc độ của gait, hệ số tốc độ của slider.
   float progressChangeAmount = (max(abs(forwardAmount),abs(turnAmount))* speedMultiplier)*globalSpeedMultiplier ;
 
   
@@ -189,7 +190,8 @@ void movingState() {
 
 Vector3 getGaitPoint(int leg, float pushFraction){  
  
-
+// nếu t bé hơn -> propell -> tính quỹ đạo 2 điểm control point, bezier bậc 1
+// nếu t lớn hơn -> lift -> tính quỹ đạo bay lên, hạ xuống, bezier bậc 3 -> làm mượt
   float rotateStrideLength = joy2CurrentVector.x * globalRotationMultiplier;
   Vector2 v = joy1CurrentVector * Vector2(1,strideLengthMultiplier);
   v.y = constrain(v.y,-maxStrideLength/2, maxStrideLength/2);

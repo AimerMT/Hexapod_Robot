@@ -57,7 +57,7 @@ long elapsedTime = 0;
 long loopStartTime = 0; 
 
 #define DATA_LENGTH 5 // Số byte dữ liệu nhận (0, Ball1.X, Ball1.Y, Ball2.X, Ball2.Y)
-#define USE_BLUETOOTH
+//#define USE_BLUETOOTH
 #define START_BYTE 0xAB
 #define END_BYTE 0xCD
 #define DATA_LENGTH_PI 4  // 4 byte joystick data
@@ -128,33 +128,43 @@ while (bluetoothSerial.available()) {
   }
 #else  // Nếu đang dùng Raspberry Pi (TalkPi)
 while (TalkPi.available()) {
-  int data = TalkPi.read();
+    int data = TalkPi.read();
 
-  if (!readData && data == START_BYTE) {  // Bắt đầu lưu khi gặp START_BYTE
-      readData = true;
-      indexOfCurDataByte = 0;
-  } 
-  else if (readData) {
-      if (indexOfCurDataByte < DATA_LENGTH_PI) {
-          Data[indexOfCurDataByte++] = data;
-      }
+    if (!readData && data == START_BYTE) {
+        readData = true;
+        indexOfCurDataByte = 0;
+    } 
+    else if (readData) {
+        if (indexOfCurDataByte < DATA_LENGTH_PI) {
+            Data[indexOfCurDataByte++] = data;
+        }
 
-      if (indexOfCurDataByte == DATA_LENGTH_PI) {  // Đã nhận đủ 4 byte
-          int endByte = TalkPi.read(); // Đọc byte kết thúc
+        // Khi đã nhận đủ 4 byte data
+        if (indexOfCurDataByte == DATA_LENGTH_PI) {
+            // Kiểm tra có endByte hay chưa
+            if (TalkPi.available()) {
+                int endByte = TalkPi.read();
 
-          if (endByte == END_BYTE) { // Kiểm tra byte kết thúc
-              rc_data.joy1_X = Data[0];
-              rc_data.joy1_Y = Data[1];
-              rc_data.joy2_X = Data[2];
-              rc_data.joy2_Y = Data[3];
-          }
-          
-          // Reset để nhận gói tin mới
-          readData = false;
-          indexOfCurDataByte = 0;
-      }
-  }
+                if (endByte == END_BYTE) {
+                    rc_data.joy1_X = Data[0];
+                    rc_data.joy1_Y = Data[1];
+                    rc_data.joy2_X = Data[2];
+                    rc_data.joy2_Y = Data[3];
+
+                    // ✅ Gửi lại ACK để bạn kiểm tra từ Raspberry Pi
+                    TalkPi.write("ACK\n");
+                } else {
+                    // Nếu sai end byte → hủy packet
+                    TalkPi.write("ERR\n");
+                }
+                // Reset để chờ gói mới
+                readData = false;
+                indexOfCurDataByte = 0;
+            }
+        }
+    }
 }
+
 #endif
   double joy1x = map(rc_data.joy1_X, 0, 255, -100, 100);
   double joy1y = map(rc_data.joy1_Y, 0, 255, -100, 100);
