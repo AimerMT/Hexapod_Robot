@@ -25,16 +25,16 @@ int cycleProgress[6];
 LegState legStates[6];
 int standProgress = 0;
 
-float standingDistanceAdjustment = 0; //-60   // khoảng cách thân so với đất trong standingstate 
-
-float distanceFromGroundBase = -40;   //-60   // khoảng cách thân so với đất trong movingstate 
+float standingDistanceAdjustmentTarget = 0; //-60   // khoảng cách thân so với đất trong standingstate 
+float standingDistanceAdjustment = 0;
+float distanceFromGroundBase = -50;   //-50   // khoảng cách thân so với đất trong movingstate 
 float distanceFromGround = 0; 
 float previousDistanceFromGround = 0;
 
-float liftHeight = 40;    //130       
-float landHeight = 20;     //70
+float liftHeight = 40;    //40       
+float landHeight = 20;     //20
 float strideOvershoot = 10;
-float distanceFromCenter = 30;         //Khoảng cách đến tâm 50
+float distanceFromCenter = 65;         //Khoảng cách đến tâm 60
 
 float crabTargetForwardAmount = 0;
 float crabForwardAmount = 0;
@@ -56,8 +56,8 @@ int attackCooldown = 0;
 long elapsedTime = 0;
 long loopStartTime = 0; 
 
-#define DATA_LENGTH 5 // Số byte dữ liệu nhận (0, Ball1.X, Ball1.Y, Ball2.X, Ball2.Y)
-#define USE_BLUETOOTH
+#define DATA_LENGTH 7 // Số byte dữ liệu nhận (0, Ball1.X, Ball1.Y, Ball2.X, Ball2.Y)
+//#define USE_BLUETOOTH
 #define START_BYTE 0xAB
 #define END_BYTE 0xCD
 #define DATA_LENGTH_PI 4  // 4 byte joystick data
@@ -70,22 +70,23 @@ bool useBluetooth = false;
 //===================================================
 
 void setup() {
+  pinMode(PA0, INPUT_PULLDOWN);  // đảm bảo mặc định là LOW
   // Initialize serial communication
   Serial.begin(9600);
   attachServos(); //Init Servo
-
-  #if defined(USE_BLUETOOTH)
-  Bluetooth_init();
-  #else
-  Serial_init();
-  #endif
-
   RC_Setup();
   stateInitialize();
+
+  delay(5000);
+  if (digitalRead(PA0) == LOW){
+  Bluetooth_init();
+  } else{
+  Serial_init();
+  }
   delay(1000);
-  //standingState();
+  // standingState();
   // rc_data.joy1_X = 127; // Đi ngang
-  // rc_data.joy1_Y = 127; // Tiến + Lùi
+  //rc_data.joy1_Y = 170; // Tiến + Lùi
   // rc_data.joy2_X = 127; // 127->255 : Xoay trái ; 0->127 : Xoay phải
   // rc_data.joy2_Y = 127;
   
@@ -96,7 +97,8 @@ void loop() {
   elapsedTime = millis() - loopStartTime;
   loopStartTime = millis();
 
-#if defined(USE_BLUETOOTH)  // Nếu đang dùng Bluetooth (HC-05)
+//#if defined(USE_BLUETOOTH)  // Nếu đang dùng Bluetooth (HC-05)
+if(digitalRead(PA0) == LOW){
 while (bluetoothSerial.available()) {
   int data = bluetoothSerial.read(); // Đọc từng byte
 
@@ -115,18 +117,35 @@ while (bluetoothSerial.available()) {
       // Khi nhận đủ 5 byte, thực hiện xử lý
       if (indexOfCurDataByte == DATA_LENGTH) {
           // Xử lý giá trị joystick sau khi nhận đủ dữ liệu
-          rc_data.joy1_X = constrain(map(Data[0], 20, 180, 0, 255), 55, 200);
-          rc_data.joy1_Y = constrain(map(Data[1], 20, 180, 255, 0), 55, 200);
-          rc_data.joy2_X = constrain(map(Data[2], 20, 180, 255, 0), 55, 200);
-          rc_data.joy2_Y = constrain(map(Data[3], 20, 180, 255, 0), 55, 200);
-
+          // rc_data.joy1_X = constrain(map(Data[0], 20, 180, 0, 255), 55, 200);
+          // rc_data.joy1_Y = constrain(map(Data[1], 20, 180, 255, 0), 55, 200);
+          // //rc_data.joy1_Y = 170;
+          // rc_data.joy2_X = constrain(map(Data[2], 20, 180, 255, 0), 55, 200);
+          // rc_data.joy2_Y = constrain(map(Data[3], 20, 180, 255, 0), 55, 200);
+          rc_data.joy1_X = constrain(map(Data[0], 20, 180, 0, 255), 0, 230);
+          rc_data.joy1_Y = constrain(map(Data[1], 20, 180, 255, 0), 0, 230);
+          //rc_data.joy1_Y = 170;
+          rc_data.joy2_X = constrain(map(Data[2], 20, 180, 255, 0), 0, 230);
+          rc_data.joy2_Y = constrain(map(Data[3], 20, 180, 255, 0), 0, 230);
+          //standingDistanceAdjustmentTarget = map(Data[5], 0, 100, 50, -50);
+          //standingDistanceAdjustment = lerp(standingDistanceAdjustment, standingDistanceAdjustmentTarget, 0.5);
+              // Đọc lựa chọn gait từ Data[4]
+          if (Data[4] == 1) {
+            currentGait = Tri;
+          } else if (Data[4] == 2) {
+            currentGait = Ripple;
+          } else if (Data[4] == 3) {
+            currentGait = Wave;
+          }
           // Reset để nhận gói tin mới
           readData = false;
           indexOfCurDataByte = 0; // đk out while
-      }
+      } 
     }
   }
-#else  // Nếu đang dùng Raspberry Pi (TalkPi)
+}
+
+if(digitalRead(PA0) == HIGH){
 while (TalkPi.available()) {
   int data = TalkPi.read();
 
@@ -155,7 +174,8 @@ while (TalkPi.available()) {
       }
   }
 }
-#endif
+}
+
   double joy1x = map(rc_data.joy1_X, 0, 255, -100, 100);
   double joy1y = map(rc_data.joy1_Y, 0, 255, -100, 100);
   double joy2x = map(rc_data.joy2_X, 0, 255, -100, 100);
@@ -169,7 +189,7 @@ while (TalkPi.available()) {
 
   previousDistanceFromGround = distanceFromGround;
   distanceFromGround = distanceFromGroundBase + rc_data.slider1 * -1.7;
-  distanceFromCenter = 60;
+  distanceFromCenter = 65;
 /*
 if (indexOfCurDataByte == DATA_LENGTH) { // Đảm bảo đọc đủ dữ liệu trước khi xử lý
     rc_data.joy1_X = constrain(map(Data[0], 20, 180, 0, 255), 0, 255);  // Ball1.X
@@ -232,8 +252,9 @@ if (indexOfCurDataByte == DATA_LENGTH) { // Đảm bảo đọc đủ dữ liệ
   }
 */
   //=========Moving=============
-  if(abs(joy1CurrentMagnitude) >= 10 || abs(joy2CurrentMagnitude) >= 10){
+  if(abs(joy1CurrentMagnitude) >= 10 || abs(joy2CurrentMagnitude) >= 5){
     movingState();
+    //debugMovingState();
     timeSinceLastInput = millis();
     return;
   }

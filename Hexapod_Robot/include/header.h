@@ -138,7 +138,9 @@ extern float maxStrideLength;
 extern float maxSpeed;
 
 void movingState();
+void debugMovingState();
 Vector3 getGaitPoint(int leg, float pushFraction);
+Vector3 calculateIK(int leg, Vector3 pos);
 
 // ================================================================
 // ===                  Initialization_State                    ===

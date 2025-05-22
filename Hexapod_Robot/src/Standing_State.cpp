@@ -1,83 +1,173 @@
-#include <Arduino.h>
-#include <header.h>
-//Standing Control Points Array
-Vector3 SCPA[6][10];
+  #include <Arduino.h>
+  #include <header.h>
+  //Standing Control Points Array
+  Vector3 SCPA[6][10];
 
-Vector3 standingStartPoints[6];      //the points the legs are at in the beginning of the standing state
-Vector3 standingInBetweenPoints[6];  //the middle points of the bezier curves that the legs will follow to smoothly transition to the end points
-Vector3 standingEndPoint;
+  Vector3 standingStartPoints[6];      //the points the legs are at in the beginning of the standing state
+  Vector3 standingInBetweenPoints[6];  //the middle points of the bezier curves that the legs will follow to smoothly transition to the end points
+  Vector3 standingEndPoint;
 
-int currentLegs[3] = { -1, -1, -1 };
-int standLoops = 0;
+  int currentLegs[3] = { -1, -1, -1 };
+  int standLoops = 0;
+/*
+  void standingState() {
+    bool moveAllAtOnce = false;
+    bool highLift = false;
+    setCycleStartPoints();
+    standingEndPoint = Vector3(distanceFromCenter, 0, distanceFromGround + standingDistanceAdjustment);
+    standLoops = 2;
+    // We only set the starting, inbetween, and ending points one time, which is when we enter the standing state.
+    if (currentState == Calibrate || currentState == Initialize || currentState == SlamAttack) moveAllAtOnce = true;
+    if (currentState == SlamAttack) highLift = true;
+    if (currentState != Stand) {
+      
+      set3HighestLeg();
+      standLoops = 0;
+      standProgress = 0;
+      memcpy(standingStartPoints, currentPoints, sizeof(currentPoints[0]) * 6);
+      currentState = Stand;
 
-void standingState() {
+      // Calculate the inbetween and ending points
+      for (int i = 0; i < 6; i++) {
+        Vector3 inBetweenPoint = standingStartPoints[i];
+        inBetweenPoint.x = (inBetweenPoint.x + standingEndPoint.x) / 2;
+        inBetweenPoint.y = (inBetweenPoint.y + standingEndPoint.y) / 2;
+
+        inBetweenPoint.z = ((inBetweenPoint.z + standingEndPoint.z) / 2);
+        if(abs(inBetweenPoint.z - standingEndPoint.z) < 50 )inBetweenPoint.z += 50;
+        if(highLift)inBetweenPoint.z += 150;
+
+        standingInBetweenPoints[i] = inBetweenPoint;
+
+        SCPA[i][0] = standingStartPoints[i];
+        SCPA[i][1] = standingInBetweenPoints[i];
+        SCPA[i][2] = standingEndPoint;
+      }
+
+      for(int i = 0; i < 6; i++){
+        legStates[i] = Standing;
+      } 
+    }
+
+    //update distance from ground constantly
+    for (int i = 0; i < 6; i++) {
+      SCPA[i][2] = standingEndPoint;
+    }
+
+    //readjusting. This takes about a second
+    while(standLoops < 2){
+      standProgress += 25;
+      if(highLift){
+        standProgress += 40 - 50 * ((float)standProgress / points);
+      }
+
+      float t = (float)standProgress / points;
+      if (t > 1) {
+        t = 1;
+      }
+
+      if(moveAllAtOnce){
+        for (int i = 0; i < 6; i++) {
+          moveToPos(i, GetPointOnBezierCurve(SCPA[i], 3, t));
+        }
+
+        if (standProgress > points) {
+          standProgress = 0;
+          standLoops = 2;
+        }
+      }
+
+      else{
+        for (int i = 0; i < 3; i++) {
+          if (currentLegs[i] != -1) {
+            moveToPos(currentLegs[i], GetPointOnBezierCurve(SCPA[currentLegs[i]], 3, t));
+          }
+        }
+
+        if (standProgress > points) {
+          standProgress = 0;
+          standLoops ++;
+          set3HighestLeg();
+        }
+      }
+    }
+
+
+    //constantly move to the standing end position
+    for (int i = 0; i < 6; i++) {
+      moveToPos(i, GetPointOnBezierCurve(SCPA[i], 3, 1));
+    }
+    return;
+  }
+*/
+
+ void standingState() {
   bool moveAllAtOnce = false;
   bool highLift = false;
   setCycleStartPoints();
-  standingEndPoint = Vector3(distanceFromCenter, 0, distanceFromGround + standingDistanceAdjustment);
+
   standLoops = 2;
-  // We only set the starting, inbetween, and ending points one time, which is when we enter the standing state.
+
   if (currentState == Calibrate || currentState == Initialize || currentState == SlamAttack) moveAllAtOnce = true;
   if (currentState == SlamAttack) highLift = true;
   if (currentState != Stand) {
-    
+
     set3HighestLeg();
     standLoops = 0;
     standProgress = 0;
     memcpy(standingStartPoints, currentPoints, sizeof(currentPoints[0]) * 6);
     currentState = Stand;
 
-    // Calculate the inbetween and ending points
+    // Tính toán in-between và end points cho từng chân
     for (int i = 0; i < 6; i++) {
-      Vector3 inBetweenPoint = standingStartPoints[i];
-      inBetweenPoint.x = (inBetweenPoint.x + standingEndPoint.x) / 2;
-      inBetweenPoint.y = (inBetweenPoint.y + standingEndPoint.y) / 2;
+      int d = 65;
+      if (i == 3 || i == 4 || i == 5) d = 75;
+      Vector3 endPoint(d, 0, distanceFromGround + standingDistanceAdjustment);
+      standingEndPoint = endPoint;  // Nếu cần dùng trong so sánh
 
-      inBetweenPoint.z = ((inBetweenPoint.z + standingEndPoint.z) / 2);
-      if(abs(inBetweenPoint.z - standingEndPoint.z) < 50 )inBetweenPoint.z += 50;
-      if(highLift)inBetweenPoint.z += 150;
+      Vector3 inBetweenPoint = currentPoints[i];
+      inBetweenPoint.x = (inBetweenPoint.x + endPoint.x) / 2;
+      inBetweenPoint.y = (inBetweenPoint.y + endPoint.y) / 2;
+      inBetweenPoint.z = ((inBetweenPoint.z + endPoint.z) / 2);
+      if (abs(inBetweenPoint.z - endPoint.z) < 50) inBetweenPoint.z += 50;
+      if (highLift) inBetweenPoint.z += 150;
 
+      standingStartPoints[i] = currentPoints[i];
       standingInBetweenPoints[i] = inBetweenPoint;
 
       SCPA[i][0] = standingStartPoints[i];
-      SCPA[i][1] = standingInBetweenPoints[i];
-      SCPA[i][2] = standingEndPoint;
+      SCPA[i][1] = inBetweenPoint;
+      SCPA[i][2] = endPoint;
     }
 
-    for(int i = 0; i < 6; i++){
+    for (int i = 0; i < 6; i++) {
       legStates[i] = Standing;
-    } 
+    }
   }
 
-  //update distance from ground constantly
+  // Luôn cập nhật điểm đến cuối cùng
   for (int i = 0; i < 6; i++) {
-    SCPA[i][2] = standingEndPoint;
+    SCPA[i][2].z = distanceFromGround + standingDistanceAdjustment;
   }
 
-  //readjusting. This takes about a second
-  while(standLoops < 2){
+  while (standLoops < 2) {
     standProgress += 25;
-    if(highLift){
+    if (highLift) {
       standProgress += 40 - 50 * ((float)standProgress / points);
     }
 
     float t = (float)standProgress / points;
-    if (t > 1) {
-      t = 1;
-    }
+    if (t > 1) t = 1;
 
-    if(moveAllAtOnce){
+    if (moveAllAtOnce) {
       for (int i = 0; i < 6; i++) {
         moveToPos(i, GetPointOnBezierCurve(SCPA[i], 3, t));
       }
-
       if (standProgress > points) {
         standProgress = 0;
         standLoops = 2;
       }
-    }
-
-    else{
+    } else {
       for (int i = 0; i < 3; i++) {
         if (currentLegs[i] != -1) {
           moveToPos(currentLegs[i], GetPointOnBezierCurve(SCPA[currentLegs[i]], 3, t));
@@ -86,14 +176,12 @@ void standingState() {
 
       if (standProgress > points) {
         standProgress = 0;
-        standLoops ++;
+        standLoops++;
         set3HighestLeg();
       }
     }
   }
 
-
-  //constantly move to the standing end position
   for (int i = 0; i < 6; i++) {
     moveToPos(i, GetPointOnBezierCurve(SCPA[i], 3, 1));
   }
